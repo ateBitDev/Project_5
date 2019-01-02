@@ -3,13 +3,15 @@ const $searchDiv = $('.search-container');
 const $body = $('body');
 const $gallery = $('.gallery');
 const userArray = [];
+let int = 0;
+let currentUser;
 
 $searchDiv.html(`<form action="#" method="get">
 <input type="search" id="search" class="search-input" placehold="Search...">
 <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
 </form>`);
 
-const search = $('#search-submit')
+const search = $('#search')
 
 for(let i = 0; i < 12; i++)
 {
@@ -18,7 +20,7 @@ for(let i = 0; i < 12; i++)
   const $cardinfo = $('<div class="card-info-container">');
   let image,first,last,email,city,state
   $.ajax({
-  url: 'https://randomuser.me/api/',
+  url: 'https://randomuser.me/api/?nat=us',
   dataType: 'json',
   success: function(data) {
   userArray.push(data);
@@ -41,20 +43,33 @@ $card.append($cardinfo);
 $gallery.append($card);
 }
 
+const $modalChanger = $(`<div class="modal-btn-container">`);
+const $backButton = $(`<button type="button" id="modal-prev" class="modal-prev btn">Prev</button>`);
+
+const $forwardButton = $(`<button type="button" id="modal-next" class="modal-next btn">Next</button>`);
+$modalChanger.append($backButton);
+$modalChanger.append($forwardButton);
+
+
 $('.card').on('click', function()
 {
-  const $modalContainer = $('<div class="modal-container"></div>');
-  const $modal = $('<div class="modal"></div>');
-  const $modalInfo = $('<div class="modal-info-container"></div>');
-  const $exitButton = $('<button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>')
-  let currentUser,first,last,image,email,location, number, birthday;
-  userArray.forEach(user =>
+  userArray.forEach((user, index) =>
     {
       if(user.results[0].name.first === this.id)
       {
         currentUser = user
+        int = index;
       }
     });
+  const buildModal = () => {
+  const $modalContainer = $('<div class="modal-container"></div>');
+  const $modal = $('<div class="modal"></div>');
+  const $modalInfo = $('<div class="modal-info-container"></div>');
+  const $exitButton = $('<button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>')
+
+  let first,last,image,email,location, number, birthday;
+
+
   image = currentUser.results[0].picture.large;
   $modalInfo.append(`<img class="modal-img" src="${image}" alt="profile picture">`);
   first = currentUser.results[0].name.first;
@@ -72,35 +87,57 @@ $('.card').on('click', function()
   $modal.append($exitButton);
   $modal.append($modalInfo);
   $modalContainer.append($modal);
+  $modalContainer.append($modalChanger);
   $body.append($modalContainer);
+  $backButton.on('click', function()
+  {
+    if(int > 0)
+    {
+    $modalContainer.remove();
+    currentUser = userArray[int -1];
+    buildModal(currentUser);
+    int--
+  }
+  });
+  $forwardButton.on('click', function()
+  {
+    if(int < 11)
+    {
+      $modalContainer.remove();
+      currentUser = userArray[int + 1];
+      buildModal(currentUser);
+      int++
+  }
+  });
   $exitButton.on('click', function(){
-  $modalContainer.remove()
+  $modalContainer.remove();
+});
+};
+buildModal(currentUser);
+});
+
+$(document).on('submit', function(e)
+{
+  e.preventDefault();
 });
 
 
-
-
+$('#search-submit').on('click', card =>
+{
+  console.log('hello')
+$('.card').each((index, card)  =>
+  {
+    if(card.id === search.val().toLowerCase())
+    {
+      $(card).show();
+    }
+    else if(search.val() === '')
+    {
+      $(card).show();
+    }
+    else
+    {
+      $(card).hide();
+    }
+  })
 });
-// $('.card').each(function(card)
-//   {
-//     if(card.id === search.val())
-//     {
-//       console.log(card);
-//     }
-//   })
-
-
-// <div class="modal-container">
-//     <div class="modal">
-//         <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
-//         <div class="modal-info-container">
-//             <img class="modal-img" src="https://placehold.it/125x125" alt="profile picture">
-//             <h3 id="name" class="modal-name cap">name</h3>
-//             <p class="modal-text">email</p>
-//             <p class="modal-text cap">city</p>
-//             <hr>
-//             <p class="modal-text">(555) 555-5555</p>
-//             <p class="modal-text">123 Portland Ave., Portland, OR 97204</p>
-//             <p class="modal-text">Birthday: 10/21/2015</p>
-//         </div>
-//     </div>
