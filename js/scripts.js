@@ -25,17 +25,16 @@ for(let i = 0; i < 12; i++)
   success: function(data) {
   userArray.push(data);
   const user = data
-  image = data.results[0].picture.large;
+  image = user.results[0].picture.large;
   $cardpic.append(`<img class="card-img" src="${image}" alt="profile picture">`);
-  first = data.results[0].name.first;
-  last = data.results[0].name.last;
-  email = data.results[0].email;
-  city = data.results[0].location.city;
-  state = data.results[0].location.state;
+  first = user.results[0].name.first;
+  last = user.results[0].name.last;
+  email = user.results[0].email;
+  city = user.results[0].location.city;
   $cardinfo.append(`<h3 id="name" class="card-name cap">${first} ${last}</h3>
   <p class="card-email">${email}</p>
-  <p class="card-location">${city}, ${state}</p>`);
-  $card.attr('id', first )
+  <p class="card-location cap">${city}</p>`);
+  $card.attr('id', first  + " " + last)
   }
 });
 $card.append($cardpic);
@@ -55,7 +54,7 @@ $('.card').on('click', function()
 {
   userArray.forEach((user, index) =>
     {
-      if(user.results[0].name.first === this.id)
+      if(this.id.includes(user.results[0].name.first))
       {
         currentUser = user
         int = index;
@@ -76,14 +75,14 @@ $('.card').on('click', function()
   last = currentUser.results[0].name.last;
   $modalInfo.append(`<h3 id="name" class="modal-name cap">${first} ${last}</h3>`);
   email = currentUser.results[0].email;
-  $modalInfo.append(`<p class="modal-text">${email}</p>`);
+  $modalInfo.append(`<p class="modal-email">${email}</p>`);
   location = currentUser.results[0].location;
-  $modalInfo.append(`<p class="modal-text cap">${location.city}</p><hr>`);
+  $modalInfo.append(`<p class="modal-city cap">${location.city}</p><hr>`);
   number = currentUser.results[0].cell;
-  $modalInfo.append(`<p class="modal-text">${number}</p>`);
-  $modalInfo.append(`<p class="modal-text">${location.street}, ${location.city}, ${location.state} ${location.postcode}</p>`);
-  birthday =currentUser.results[0].dob.date;
-  $modalInfo.append(`<p class="modal-text">Birthday: ${birthday.substring(0,10)}</p>`);
+  $modalInfo.append(`<p class="modal-number">${number}</p>`);
+  $modalInfo.append(`<p class="modal-location cap">${location.street}, ${location.state} ${location.postcode}</p>`);
+  birthday =currentUser.results[0].dob.date.substring(0,10);
+  $modalInfo.append(`<p class="modal-dob cap">Birthday: ${birthday.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$2/$3/$1")}</p>`);
   $modal.append($exitButton);
   $modal.append($modalInfo);
   $modalContainer.append($modal);
@@ -127,9 +126,14 @@ $('#search-submit').on('click', card =>
   console.log('hello')
 $('.card').each((index, card)  =>
   {
-    if(card.id === search.val().toLowerCase())
+    let fullName = card.id.split(' ');
+    if(search.val().toLowerCase().includes(fullName[0]))
     {
       $(card).show();
+    }
+    else if(search.val().toLowerCase().includes(card.id))
+    {
+
     }
     else if(search.val() === '')
     {
